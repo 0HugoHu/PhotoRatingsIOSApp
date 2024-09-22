@@ -9,14 +9,14 @@ import SwiftUI
 
 struct RatingsView: View {
     var rateAction: (String, String, Int) -> Void
-    var imageInfo: ImageInfo
+    var image: ImageStruct
     @State private var ratingOptions = [1, 2, 3]
     @State private var ratingOptionsEnhanced = [-1, 5]
     
     var body: some View {
         HStack(spacing: 20) {
             Button(action: {
-                rateAction(imageInfo.filename, imageInfo.partition, 5)
+                rateAction(image.filename, image.partition, 5)
             }) {
                 Text("Best")
                     .frame(width: 80, height: 50)
@@ -26,7 +26,7 @@ struct RatingsView: View {
             }
             
             Button(action: {
-                rateAction(imageInfo.filename, imageInfo.partition, -1)
+                rateAction(image.filename, image.partition, -1)
             }) {
                 Text("Worst")
                     .frame(width: 180, height: 50)
@@ -39,7 +39,7 @@ struct RatingsView: View {
         HStack(spacing: 20) {
             ForEach(ratingOptions, id: \.self) { rating in
                 Button(action: {
-                    rateAction(imageInfo.filename, imageInfo.partition, rating)
+                    rateAction(image.filename, image.partition, rating)
                 }) {
                     Text("Rate \(rating)")
                         .frame(width: 80, height: 50)

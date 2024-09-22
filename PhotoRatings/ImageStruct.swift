@@ -5,7 +5,16 @@
 //  Created by Hugooooo on 9/21/24.
 //
 
-struct ImageInfo: Codable {
+import SwiftUI
+
+struct ImageStruct {
+    let image: UIImage
     let filename: String
     let partition: String
 }
+
+struct ImageList: Codable {
+    let filename: String
+    let partition: String
+}
+

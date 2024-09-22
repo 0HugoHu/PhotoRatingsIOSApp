@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		C26884D92CA0A63800DD964E /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = C26884D82CA0A63000DD964E /* .gitignore */; };
+		C26884DB2CA0BCD200DD964E /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = C26884DA2CA0BCCD00DD964E /* LICENSE */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -32,6 +33,7 @@
 		C26884AE2C9F8E8900DD964E /* PhotoRatingsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PhotoRatingsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C26884B82C9F8E8900DD964E /* PhotoRatingsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PhotoRatingsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C26884D82CA0A63000DD964E /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		C26884DA2CA0BCCD00DD964E /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -93,6 +95,7 @@
 		C26884952C9F8E8700DD964E = {
 			isa = PBXGroup;
 			children = (
+				C26884DA2CA0BCCD00DD964E /* LICENSE */,
 				C26884D82CA0A63000DD964E /* .gitignore */,
 				C26884A02C9F8E8700DD964E /* PhotoRatings */,
 				C26884B12C9F8E8900DD964E /* PhotoRatingsTests */,
@@ -232,6 +235,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C26884D92CA0A63800DD964E /* .gitignore in Resources */,
+				C26884DB2CA0BCD200DD964E /* LICENSE in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
