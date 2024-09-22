@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C26884D92CA0A63800DD964E /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = C26884D82CA0A63000DD964E /* .gitignore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		C26884AF2C9F8E8900DD964E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,11 +31,25 @@
 		C268849E2C9F8E8700DD964E /* PhotoRatings.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhotoRatings.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C26884AE2C9F8E8900DD964E /* PhotoRatingsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PhotoRatingsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C26884B82C9F8E8900DD964E /* PhotoRatingsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PhotoRatingsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C26884D82CA0A63000DD964E /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C26884D52C9FAFA100DD964E /* Exceptions for "PhotoRatings" folder in "PhotoRatings" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C268849D2C9F8E8700DD964E /* PhotoRatings */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		C26884A02C9F8E8700DD964E /* PhotoRatings */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C26884D52C9FAFA100DD964E /* Exceptions for "PhotoRatings" folder in "PhotoRatings" target */,
+			);
 			path = PhotoRatings;
 			sourceTree = "<group>";
 		};
@@ -75,6 +93,7 @@
 		C26884952C9F8E8700DD964E = {
 			isa = PBXGroup;
 			children = (
+				C26884D82CA0A63000DD964E /* .gitignore */,
 				C26884A02C9F8E8700DD964E /* PhotoRatings */,
 				C26884B12C9F8E8900DD964E /* PhotoRatingsTests */,
 				C26884BB2C9F8E8900DD964E /* PhotoRatingsUITests */,
@@ -212,6 +231,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C26884D92CA0A63800DD964E /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -399,6 +419,7 @@
 				DEVELOPMENT_TEAM = K5349Y2KC7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PhotoRatings/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -428,6 +449,7 @@
 				DEVELOPMENT_TEAM = K5349Y2KC7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PhotoRatings/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

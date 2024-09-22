@@ -1,0 +1,12 @@
+# Ignore build files
+.build/
+DerivedData/
+xcuserdata/
+
+# Ignore local configuration files
+PhotoRatings/Config.swift
+
+# Ignore temporary files
+*.swp
+*.lock
+.DS_Store
