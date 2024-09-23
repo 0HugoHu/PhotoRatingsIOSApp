@@ -11,6 +11,7 @@ struct ContentView: View {
     @State private var images: [ImageStruct] = []
     @State private var currentIndex: Int = 0
     @State private var imagesLoaded: Bool = false
+    @State private var remainingImages: Int = 10
     
     var body: some View {
         VStack {
@@ -28,7 +29,7 @@ struct ContentView: View {
                 
                 RatingsView(rateAction: rateImage, image: images[currentIndex])
             } else {
-                Text("Loading images...")
+                Text("Loading images...\(remainingImages)")
             }
         }
         .onAppear {
@@ -44,27 +45,44 @@ struct ContentView: View {
             
             if let imageList = try? JSONDecoder().decode([ImageList].self, from: data) {
                 self.images = []
-                var imageLoadTasks: [URLSessionDataTask] = []
+                self.remainingImages = imageList.count
                 
                 for image in imageList {
                     guard let imageURL = URL(string: PC_IP + GET_IMAGE + "/\(image.partition)/\(image.filename)") else { continue }
                     
-                    let imageTask = URLSession.shared.dataTask(with: imageURL) { imageData, _, _ in
-                        guard let imageData = imageData, let uiImage = UIImage(data: imageData) else { return }
-                        self.images.append(ImageStruct(image: uiImage, filename: image.filename, partition: image.partition))
-                        if self.images.count == imageList.count {
-                            self.imagesLoaded = true
-                        }
-                        
-                    }
-                    imageLoadTasks.append(imageTask)
+                    loadImage(from: imageURL, filename: image.filename, partition: image.partition, retries: 3)
                 }
-                imageLoadTasks.forEach { $0.resume() }
-                
             }
         }
+        
         task.resume()
     }
+    
+    
+    func loadImage(from url: URL, filename: String, partition: String, retries: Int) {
+        let imageTask = URLSession.shared.dataTask(with: url) { imageData, response, error in
+            if let imageData = imageData, let uiImage = UIImage(data: imageData) {
+                DispatchQueue.main.async {
+                    self.images.append(ImageStruct(image: uiImage, filename: filename, partition: partition))
+                    self.remainingImages -= 1
+                    if self.images.count == self.remainingImages {
+                        self.imagesLoaded = true
+                    }
+                }
+            } else {
+                if retries > 0 {
+                    print("Retrying image load for \(filename)...")
+                    loadImage(from: url, filename: filename, partition: partition, retries: retries - 1)
+                } else {
+                    print("Failed to load image: \(filename) after retries")
+                }
+            }
+        }
+        
+        imageTask.resume()
+    }
+    
+    
     
     
     func rateImage(name: String, partition: String, rating: Int) {
@@ -98,6 +116,7 @@ struct ContentView: View {
         
         if images.isEmpty {
             self.imagesLoaded = false
+            self.remainingImages = 10
             loadImagesFromPC()
         } else if currentIndex >= images.count {
             currentIndex = images.count - 1
