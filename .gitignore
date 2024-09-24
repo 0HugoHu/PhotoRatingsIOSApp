@@ -11,3 +11,4 @@ PhotoRatings/Config.swift
 *.lock
 .DS_Store
 PhotoRatings/Config.swift
+PhotoRatings/secrets_do_not_upload.swift

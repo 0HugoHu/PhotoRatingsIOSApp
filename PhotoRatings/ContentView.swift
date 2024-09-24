@@ -29,43 +29,67 @@ struct ContentView: View {
                 
                 RatingsView(rateAction: rateImage, image: images[currentIndex])
             } else {
-                Text("Loading images...\(remainingImages)")
+                Text("Loading images... \(remainingImages)")
             }
         }
         .onAppear {
-            loadImagesFromPC()
+            login { success in
+                if success {
+                    loadImagesFromPC()
+                }
+            }
         }
     }
     
     func loadImagesFromPC() {
+        guard let token = authToken else {
+            print("Authorization token is missing. Cannot load images.")
+            return
+        }
+
         guard let url = URL(string: PC_IP + GET_IMAGE_LIST) else { return }
-        
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
-            guard let data = data, error == nil else { return }
-            
+
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data, error == nil else {
+                print("Error loading image list: \(String(describing: error))")
+                return
+            }
+
             if let imageList = try? JSONDecoder().decode([ImageList].self, from: data) {
                 self.images = []
                 self.remainingImages = imageList.count
-                
+
                 for image in imageList {
                     guard let imageURL = URL(string: PC_IP + GET_IMAGE + "/\(image.partition)/\(image.filename)") else { continue }
-                    
+
                     loadImage(from: imageURL, filename: image.filename, partition: image.partition, retries: 3)
                 }
+            } else {
+                print("Failed to decode image list.")
             }
         }
-        
+
         task.resume()
     }
-    
-    
+
     func loadImage(from url: URL, filename: String, partition: String, retries: Int) {
-        let imageTask = URLSession.shared.dataTask(with: url) { imageData, response, error in
+        guard let token = authToken else {
+            print("Authorization token is missing. Cannot load image: \(filename)")
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let imageTask = URLSession.shared.dataTask(with: request) { imageData, response, error in
             if let imageData = imageData, let uiImage = UIImage(data: imageData) {
                 DispatchQueue.main.async {
                     self.images.append(ImageStruct(image: uiImage, filename: filename, partition: partition))
                     self.remainingImages -= 1
-                    if self.images.count == self.remainingImages {
+                    if self.remainingImages == 0 {
                         self.imagesLoaded = true
                     }
                 }
@@ -78,26 +102,31 @@ struct ContentView: View {
                 }
             }
         }
-        
+
         imageTask.resume()
     }
     
     
     
-    
     func rateImage(name: String, partition: String, rating: Int) {
-        deleteCurrentImage()
+        guard let url = URL(string: PC_IP + RATE_IMAGE),
+              let token = authToken else {
+            print("Authorization token missing or invalid URL")
+            return
+        }
         
-        guard let url = URL(string: PC_IP + RATE_IMAGE) else { return }
+        // Always respond to user's action first
+        deleteCurrentImage()
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
         let body: [String: Any] = ["image_name": name, "rating": rating, "partition": partition]
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
         
-        let task = URLSession.shared.dataTask(with: request) { _, response, error in
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("Error sending rating:", error)
             } else {
@@ -107,11 +136,11 @@ struct ContentView: View {
         
         task.resume()
     }
+
     
     
     func deleteCurrentImage() {
         guard currentIndex < images.count else { return }
-        
         images.remove(at: currentIndex)
         
         if images.isEmpty {
