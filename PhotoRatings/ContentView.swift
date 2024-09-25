@@ -18,10 +18,12 @@ struct ContentView: View {
             if imagesLoaded {
                 TabView(selection: $currentIndex) {
                     ForEach(0..<images.count, id: \.self) { index in
-                        Image(uiImage: images[index].image)
-                            .resizable()
-                            .scaledToFit()
-                            .tag(index)
+                        if images[index].isVisible {
+                            Image(uiImage: images[index].image)
+                                .resizable()
+                                .scaledToFit()
+                                .tag(index)
+                        }
                     }
                 }
                 .tabViewStyle(PageTabViewStyle())
@@ -141,16 +143,18 @@ struct ContentView: View {
     
     func deleteCurrentImage() {
         guard currentIndex < images.count else { return }
-        images.remove(at: currentIndex)
+        images[currentIndex].isVisible = false
         
-        if images.isEmpty {
+        if currentIndex < images.count - 1 {
+            currentIndex += 1
+        } else if currentIndex >= images.count - 1 {
+            currentIndex = 0
             self.imagesLoaded = false
             self.remainingImages = 10
             loadImagesFromPC()
-        } else if currentIndex >= images.count {
-            currentIndex = images.count - 1
         }
     }
+
     
     
 }

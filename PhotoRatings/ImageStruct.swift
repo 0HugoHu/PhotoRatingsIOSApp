@@ -11,6 +11,7 @@ struct ImageStruct {
     let image: UIImage
     let filename: String
     let partition: String
+    var isVisible: Bool = true
 }
 
 struct ImageList: Codable {
