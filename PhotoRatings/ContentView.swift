@@ -9,9 +9,14 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var images: [ImageStruct] = []
+    @State private var preloadedImages: [ImageStruct] = []
     @State private var currentIndex: Int = 0
     @State private var imagesLoaded: Bool = false
-    @State private var remainingImages: Int = 10
+    @State private var remainingImages: Int = IMAGE_COUNT
+    @State private var preloadCount: Int = 0
+    @State private var completedPreloads: Bool = false
+    @State private var isPreloading: Bool = false
+    
     
     var body: some View {
         VStack {
@@ -28,6 +33,9 @@ struct ContentView: View {
                 }
                 .tabViewStyle(PageTabViewStyle())
                 .frame(maxHeight: 600)
+                .onChange(of: currentIndex) { _, newIndex in
+                    checkIfPreloadNeeded(for: newIndex)
+                }
                 
                 RatingsView(rateAction: rateImage, image: images[currentIndex])
             } else {
@@ -43,49 +51,145 @@ struct ContentView: View {
         }
     }
     
+    
+    func checkIfPreloadNeeded(for index: Int) {
+        if index >= 1, !isPreloading, !completedPreloads {
+            print("Starting to preload next batch...")
+            preloadNextBatch()
+        }
+    }
+    
+    
+    func preloadNextBatch() {
+        isPreloading = true
+        preloadCount = IMAGE_COUNT
+        guard let token = authToken else {
+            print("Authorization token is missing. Cannot preload images.")
+            return
+        }
+        
+        guard let url = URL(string: PC_IP + GET_IMAGE_LIST) else { return }
+        
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data, error == nil else {
+                print("Error preloading image list: \(String(describing: error))")
+                return
+            }
+            
+            if let imageList = try? JSONDecoder().decode([ImageList].self, from: data) {
+                self.preloadedImages = []
+                self.preloadCount = imageList.count
+                
+                for image in imageList {
+                    guard let imageURL = URL(string: PC_IP + GET_IMAGE + "/\(image.partition)/\(image.filename)") else { continue }
+                    
+                    preloadImage(from: imageURL, filename: image.filename, partition: image.partition, retries: 3)
+                }
+            } else {
+                self.isPreloading = false
+                self.completedPreloads = false
+                print("Failed to decode preloaded image list.")
+            }
+        }
+        
+        task.resume()
+    }
+    
+    
+    func preloadImage(from url: URL, filename: String, partition: String, retries: Int) {
+        guard let token = authToken else {
+            print("Authorization token is missing. Cannot preload image: \(filename)")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        let imageTask = URLSession.shared.dataTask(with: request) { imageData, response, error in
+            if let imageData = imageData, let uiImage = UIImage(data: imageData) {
+                DispatchQueue.main.async {
+                    self.preloadedImages.append(ImageStruct(image: uiImage, filename: filename, partition: partition))
+                    print("Preloaded image: \(filename)")
+                    
+                    self.preloadCount -= 1
+                    if self.preloadCount == 0 {
+                        appendPreloadedImages()
+                    }
+                }
+            } else {
+                if retries > 0 {
+                    print("Retrying preload for \(filename)...")
+                    preloadImage(from: url, filename: filename, partition: partition, retries: retries - 1)
+                } else {
+                    self.preloadCount -= 1
+                    if self.preloadCount == 0 {
+                        appendPreloadedImages()
+                    }
+                    print("Failed to preload image: \(filename) after retries")
+                }
+            }
+        }
+        
+        imageTask.resume()
+    }
+    
+    
+    func appendPreloadedImages() {
+        DispatchQueue.main.async {
+            self.isPreloading = false
+            self.completedPreloads = true
+            print("Preloading completed.")
+        }
+    }
+    
+    
     func loadImagesFromPC() {
         guard let token = authToken else {
             print("Authorization token is missing. Cannot load images.")
             return
         }
-
+        
         guard let url = URL(string: PC_IP + GET_IMAGE_LIST) else { return }
-
+        
         var request = URLRequest(url: url)
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-
+        
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {
                 print("Error loading image list: \(String(describing: error))")
                 return
             }
-
+            
             if let imageList = try? JSONDecoder().decode([ImageList].self, from: data) {
                 self.images = []
                 self.remainingImages = imageList.count
-
+                
                 for image in imageList {
                     guard let imageURL = URL(string: PC_IP + GET_IMAGE + "/\(image.partition)/\(image.filename)") else { continue }
-
+                    
                     loadImage(from: imageURL, filename: image.filename, partition: image.partition, retries: 3)
                 }
             } else {
                 print("Failed to decode image list.")
             }
         }
-
+        
         task.resume()
     }
-
+    
+    
     func loadImage(from url: URL, filename: String, partition: String, retries: Int) {
         guard let token = authToken else {
             print("Authorization token is missing. Cannot load image: \(filename)")
             return
         }
-
+        
         var request = URLRequest(url: url)
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-
+        
         let imageTask = URLSession.shared.dataTask(with: request) { imageData, response, error in
             if let imageData = imageData, let uiImage = UIImage(data: imageData) {
                 DispatchQueue.main.async {
@@ -100,14 +204,14 @@ struct ContentView: View {
                     print("Retrying image load for \(filename)...")
                     loadImage(from: url, filename: filename, partition: partition, retries: retries - 1)
                 } else {
+                    self.remainingImages -= 1
                     print("Failed to load image: \(filename) after retries")
                 }
             }
         }
-
+        
         imageTask.resume()
     }
-    
     
     
     func rateImage(name: String, partition: String, rating: Int) {
@@ -138,7 +242,6 @@ struct ContentView: View {
         
         task.resume()
     }
-
     
     
     func deleteCurrentImage() {
@@ -148,13 +251,17 @@ struct ContentView: View {
         if currentIndex < images.count - 1 {
             currentIndex += 1
         } else if currentIndex >= images.count - 1 {
-            currentIndex = 0
-            self.imagesLoaded = false
-            self.remainingImages = 10
-            loadImagesFromPC()
+            self.imagesLoaded = !self.isPreloading
+            self.remainingImages = IMAGE_COUNT - self.preloadedImages.count
+            self.currentIndex = 0
+            
+            self.images.removeAll()
+            self.images.append(contentsOf: self.preloadedImages)
+            self.preloadedImages.removeAll()
+            
+            self.completedPreloads = false
         }
     }
-
     
     
 }
