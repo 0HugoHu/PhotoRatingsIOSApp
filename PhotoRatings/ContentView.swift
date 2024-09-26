@@ -16,6 +16,7 @@ struct ContentView: View {
     @State private var preloadCount: Int = 0
     @State private var completedPreloads: Bool = false
     @State private var isPreloading: Bool = false
+    @State private var isBroswingCompleted: Bool = false
     
     
     var body: some View {
@@ -115,6 +116,9 @@ struct ContentView: View {
                     print("Preloaded image: \(filename)")
                     
                     self.preloadCount -= 1
+                    if self.isBroswingCompleted {
+                        self.remainingImages -= 1
+                    }
                     if self.preloadCount == 0 {
                         appendPreloadedImages()
                     }
@@ -125,6 +129,9 @@ struct ContentView: View {
                     preloadImage(from: url, filename: filename, partition: partition, retries: retries - 1)
                 } else {
                     self.preloadCount -= 1
+                    if self.isBroswingCompleted {
+                        self.remainingImages -= 1
+                    }
                     if self.preloadCount == 0 {
                         appendPreloadedImages()
                     }
@@ -139,9 +146,22 @@ struct ContentView: View {
     
     func appendPreloadedImages() {
         DispatchQueue.main.async {
-            self.isPreloading = false
-            self.completedPreloads = true
             print("Preloading completed.")
+            self.isPreloading = false
+            if self.isBroswingCompleted {
+                print ("Appending preloaded images to main list...")
+                self.isBroswingCompleted = false
+                self.images.removeAll()
+                self.images.append(contentsOf: self.preloadedImages)
+                self.currentIndex = 0
+                self.preloadedImages.removeAll()
+                self.completedPreloads = false
+                self.imagesLoaded = true
+            } else {
+                print("Preloading completed but browsing is not done yet.")
+                self.isPreloading = false
+                self.completedPreloads = true
+            }
         }
     }
     
@@ -253,13 +273,16 @@ struct ContentView: View {
         } else if currentIndex >= images.count - 1 {
             self.imagesLoaded = !self.isPreloading
             self.remainingImages = IMAGE_COUNT - self.preloadedImages.count
-            self.currentIndex = 0
+            self.isBroswingCompleted = true
+            if (self.imagesLoaded) {
+                self.images.removeAll()
+                self.images.append(contentsOf: self.preloadedImages)
+                self.currentIndex = 0
+                self.preloadedImages.removeAll()
+                self.completedPreloads = false
+                self.isBroswingCompleted = false
+            }
             
-            self.images.removeAll()
-            self.images.append(contentsOf: self.preloadedImages)
-            self.preloadedImages.removeAll()
-            
-            self.completedPreloads = false
         }
     }
     
