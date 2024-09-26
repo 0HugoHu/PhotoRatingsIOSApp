@@ -3,12 +3,9 @@
 DerivedData/
 xcuserdata/
 
-# Ignore local configuration files
-PhotoRatings/Config.swift
-
 # Ignore temporary files
 *.swp
 *.lock
 .DS_Store
-PhotoRatings/Config.swift
-PhotoRatings/secrets_do_not_upload.swift
+
+PhotoRatings/Config/secrets_do_not_upload.swift
