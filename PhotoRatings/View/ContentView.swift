@@ -276,8 +276,12 @@ struct ContentView: View {
             self.isBroswingCompleted = true
             if (self.imagesLoaded) {
                 self.images.removeAll()
-                self.images.append(contentsOf: self.preloadedImages)
+                let preloadedImageCount = self.preloadedImages.count
+                let tempImageStruct = self.preloadedImages[preloadedImageCount - 1]
+                self.preloadedImages[preloadedImageCount - 1] = self.preloadedImages[0]
                 self.currentIndex = 0
+                self.images.append(contentsOf: self.preloadedImages)
+                self.preloadedImages[preloadedImageCount - 1] = tempImageStruct
                 self.preloadedImages.removeAll()
                 self.completedPreloads = false
                 self.isBroswingCompleted = false

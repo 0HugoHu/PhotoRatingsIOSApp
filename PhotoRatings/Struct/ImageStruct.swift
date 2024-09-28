@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ImageStruct {
-    let image: UIImage
+    var image: UIImage
     let filename: String
     let partition: String
     var isVisible: Bool = true
