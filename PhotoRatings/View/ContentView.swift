@@ -35,6 +35,7 @@ struct ContentView: View {
                 .tabViewStyle(PageTabViewStyle())
                 .frame(maxHeight: 600)
                 .onChange(of: currentIndex) { _, newIndex in
+                    triggerHapticFeedback(style: .light)
                     checkIfPreloadNeeded(for: newIndex)
                 }
                 

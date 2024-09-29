@@ -10,42 +10,38 @@ import SwiftUI
 struct RatingsView: View {
     var rateAction: (String, String, Int) -> Void
     var image: ImageStruct
-    @State private var ratingOptions = [1, 2, 3]
-    @State private var ratingOptionsEnhanced = [-1, 5]
+    let ratingOptions = [1, 2, 3]
+    let specialRatings = [(-1, "Worst", Color.red), (5, "Best", Color.green)]
     
     var body: some View {
-        HStack(spacing: 20) {
-            Button(action: {
-                rateAction(image.filename, image.partition, 5)
-            }) {
-                Text("Best")
-                    .frame(width: 80, height: 50)
-                    .background(Color.red)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+        VStack(spacing: 20) {
+            HStack(spacing: 20) {
+                ForEach(specialRatings, id: \.0) { rating, label, color in
+                    Button(action: {
+                        rateAction(image.filename, image.partition, rating)
+                    }) {
+                        Text(label)
+                            .frame(width: rating == -1 ? 180 : 80, height: 50)
+                            .background(color)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .withHapticFeedback(style: .rigid)
+                }
             }
             
-            Button(action: {
-                rateAction(image.filename, image.partition, -1)
-            }) {
-                Text("Worst")
-                    .frame(width: 180, height: 50)
-                    .background(Color.red)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-        }
-        .padding()
-        HStack(spacing: 20) {
-            ForEach(ratingOptions, id: \.self) { rating in
-                Button(action: {
-                    rateAction(image.filename, image.partition, rating)
-                }) {
-                    Text("Rate \(rating)")
-                        .frame(width: 80, height: 50)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+            HStack(spacing: 20) {
+                ForEach(ratingOptions, id: \.self) { rating in
+                    Button(action: {
+                        rateAction(image.filename, image.partition, rating)
+                    }) {
+                        Text("Rate \(rating)")
+                            .frame(width: 80, height: 50)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .withHapticFeedback(style: .medium)
                 }
             }
         }
